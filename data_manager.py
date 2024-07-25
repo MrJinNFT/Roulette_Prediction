@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 import os
+import pandas as pd
 
 DATABASE_PATH = "/home/user/DB/serversgta5rp"
 
@@ -26,9 +27,16 @@ def create_tables(server_name):
             username TEXT DEFAULT 'AI'
         );
         ''')
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS guessed_numbers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            number TEXT NOT NULL,
+            username TEXT NOT NULL,
+            timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        ''')
         conn.commit()
 
-        # Ensure columns 'hour' and 'minute' exist
         cursor.execute("PRAGMA table_info(roulette_numbers)")
         columns = [info[1] for info in cursor.fetchall()]
         if 'hour' not in columns:
@@ -43,7 +51,7 @@ def create_tables(server_name):
     finally:
         conn.close()
 
-def insert_number(server_name, number, username='AI'):
+def insert_roulette_number(server_name, number, username='AI'):
     conn = connect_db(server_name)
     cursor = conn.cursor()
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -84,23 +92,34 @@ def get_following_numbers(server_name, target_number):
         return [], False
     return filtered_numbers, True
 
+def get_guessed_history(server_name):
+    conn = connect_db(server_name)
+    cursor = conn.cursor()
+    cursor.execute("SELECT number, username FROM guessed_numbers ORDER BY timestamp DESC LIMIT 5")
+    history = cursor.fetchall()
+    conn.close()
+    return [{'number': row[0], 'predictor': row[1]} for row in history]
+
+def add_guessed_number(server_name, number, username):
+    conn = connect_db(server_name)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO guessed_numbers (number, username) VALUES (?, ?)")
+    cursor.execute("DELETE FROM guessed_numbers WHERE id NOT IN (SELECT id FROM guessed_numbers ORDER BY timestamp DESC LIMIT 5)")
+    conn.commit()
+    conn.close()
+
 def cancel_and_get_previous_entry(server_name):
     try:
         conn = connect_db(server_name)
         cursor = conn.cursor()
-
         cursor.execute('SELECT id FROM roulette_numbers ORDER BY id DESC LIMIT 1')
         last_entry = cursor.fetchone()
-
         if last_entry:
             last_entry_id = last_entry[0]
-
             cursor.execute('SELECT number FROM roulette_numbers WHERE id < ? ORDER BY id DESC LIMIT 1', (last_entry_id,))
             previous_entry = cursor.fetchone()
-
             cursor.execute('DELETE FROM roulette_numbers WHERE id = ?', (last_entry_id,))
             conn.commit()
-
             if previous_entry:
                 return True, previous_entry[0]
             else:

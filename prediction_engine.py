@@ -1,5 +1,5 @@
 from collections import Counter
-from data_manager import get_following_numbers, get_all_numbers, insert_number
+from data_manager import get_following_numbers, get_all_numbers, insert_roulette_number
 
 class PredictionEngine:
     def __init__(self):
@@ -45,10 +45,13 @@ class PredictionEngine:
 
             filtered_predictions = [
                 pred for pred in historical_predictions
-                if not (pred['number'] == last_two_numbers[-1] and pred['number'] == last_two_numbers[-2])
+                if not (pred['number'] == last_two_numbers[-1] and pred['number'] == last_two_numbers[-1])
             ]
 
             return filtered_predictions
         except Exception as e:
             print(f"An error occurred in combined_predictions: {str(e)}")
             return [{"number": "Error", "probability": "0%"}]
+
+if __name__ == "__main__":
+    print("Prediction Engine module")

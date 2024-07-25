@@ -15,11 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorElement = document.getElementById('error');
     const predictionElement = document.getElementById('predictions');
-    const guessedHistoryElement = document.getElementById('guessed-history ul'); // Element for guessed history
-    const aiDisclaimer = document.createElement('div');
-    aiDisclaimer.innerHTML = "<p class='ai-disclaimer'>Внимание: Не полагайтесь на предсказания AI на данном этапе. Модель все еще обучается (Не ставьте ставки полагаясь на предсказания. ждите обновления.).</p>";
-    
-    predictionElement.before(aiDisclaimer);
+    const guessedHistoryElement = document.getElementById('guessed-history ul');
 
     rouletteNumbers.forEach(function (numberElement) {
         numberElement.addEventListener('click', function () {
@@ -82,6 +78,34 @@ document.addEventListener('DOMContentLoaded', function () {
                         dublLabel.textContent = 'Dubl';
                         div.appendChild(dublLabel);
                     }
+
+                    div.addEventListener('click', function() {
+                        fetch('/guessed', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `number=${encodeURIComponent(numberDisplay)}&username=${encodeURIComponent(username)}&server=${encodeURIComponent(document.getElementById('hiddenServerField').value)}`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(guessedData => {
+                            guessedHistoryElement.innerHTML = '';
+                            guessedData.forEach(entry => {
+                                const li = document.createElement('li');
+                                li.textContent = `${entry.predictor} угадал число ${entry.number}`;
+                                guessedHistoryElement.appendChild(li);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
+                    });
+
                     predictionRows[Math.floor(index / 3)].push(div); 
                 });
 
@@ -100,11 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     guessedHistoryElement.appendChild(li);
                 });
             })
-            .catch(error => {
-                errorElement.style.display = 'block';
-                errorElement.textContent = 'Спасибо: Модель приняла ваши данные. надеюсь это не всё.';
-                console.error('Error:', error);
-            });
+
         });
     });
 
