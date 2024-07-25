@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Авторизация{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Авторизация через Telegram</h2>
+    <p>Пожалуйста, подождите, проверка подписки...</p>
+    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOMContentLoaded event fired");
+
+            Telegram.WebApp.ready(function() {
+                console.log("Telegram WebApp ready");
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                console.log("User data:", user);
+
+                if (user) {
+                    const auth_data = {
+                        id: user.id,
+                        username: user.username,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        photo_url: user.photo_url,
+                        auth_date: user.auth_date,
+                        hash: Telegram.WebApp.initDataUnsafe.hash
+                    };
+
+                    console.log("Auth data to be sent:", auth_data);
+
+                    fetch("{{ url_for('telegram_login', _external=True) }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(auth_data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Data received:", data);
+                        if (data.status === 'success') {
+                            window.location.href = "{{ url_for('predicts') }}";
+                        } else if (data.status === 'failure' && data.reason === 'subscription_error') {
+                            window.location.href = "{{ url_for('subscription_error') }}";
+                        } else {
+                            alert('Не удалось авторизоваться через Telegram. Пожалуйста, попробуйте ещё раз.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при авторизации. Пожалуйста, попробуйте ещё раз.');
+                    });
+                } else {
+                    console.error('No user data available in initDataUnsafe');
+                    alert('Не удалось получить данные пользователя. Пожалуйста, попробуйте ещё раз.');
+                }
+            });
+        });
+    </script>
+</div>
+{% endblock %}

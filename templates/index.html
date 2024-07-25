@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Авторизация - Предсказывание Рулетки{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Проект/Сервер</h1>
+</header>
+
+<main>
+    <p>Уважаемый {{ username }}, для того чтобы использовать приложение, пожалуйста, выберите проект и сервер.</p>
+    <div class="selection-form-container">
+        <form id="selection-form">
+            <div class="form-field">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-field">
+                <label for="project">Проект:</label>
+                <select id="project" name="project">
+                    <option value="GTA5RP">GTA5 RP</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="server">Сервер:</label>
+                <select id="server" name="server">
+                    <!-- Сервера будут добавлены динамически -->
+                </select>
+            </div>
+            <div class="form-field">
+                <button type="button" id="go-to-predictions">Перейти к предсказаниям</button>
+            </div>
+            <input type="hidden" id="hiddenServerField" name="server">
+        </form>
+    </div>
+</main>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="{{ url_for('static', filename='js/selection.js') }}"></script>
+{% endblock %}

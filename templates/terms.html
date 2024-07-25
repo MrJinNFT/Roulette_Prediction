@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Пользовательское соглашение - Предсказатель рулетки для GTA5 RP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body>
+  <div id="loadingGifContainer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 1000; display: flex; justify-content: center; align-items: center;">
+    <img src="static/images/loading.gif" alt="Loading...">
+</div>
+
+<button class="menu-button">Меню</button>
+<div class="dropdown-menu" style="display: none;">
+    <ul>
+        <li><a href="/">Предсказывание рулетки</a></li>
+    </ul>
+</div>
+
+
+   
+<main>
+    {% endblock %}

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Технические работы</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #0f0;
+            overflow: hidden;
+        }
+
+        .maintenance-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .maintenance-message h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #ff0;
+            animation: text-fade 1.5s linear infinite;
+        }
+
+        .maintenance-message p {
+            font-size: 1em;
+            margin: 5px 0;
+            color: #ff0;
+            animation: text-fade 1.5s linear infinite;
+        }
+
+        .matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .matrix span {
+            display: block;
+            position: absolute;
+            top: 0;
+            font-size: 1.2em;
+            color: #fff;
+            animation: drop 4s linear infinite;
+        }
+
+        .number-circle, .letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .red-background {
+            background-color: red;
+        }
+
+        .black-background {
+            background-color: black;
+        }
+
+        .green-background {
+            background-color: green;
+        }
+
+        @keyframes drop {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes text-fade {
+            0%, 100% { color: #ff0; }
+            25% { color: #0f0; }
+            50% { color: #f00; }
+            75% { color: #00f; }
+        }
+
+        .scoreboard {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5em;
+            color: #ff0;
+        }
+
+        .letters-collected {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            font-size: 1.5em;
+            color: #ff0;
+            display: flex;
+            gap: 5px;
+        }
+
+        .collected-letter {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="matrix"></div>
+<div class="maintenance-container" id="maintenance-container">
+    <div class="maintenance-message">
+        <h1>⚙️ Технические работы ⚙️</h1>
+        <p>Модель в процессе обучения. Сколько это займёт времени? Кто знает! 🤷‍♂️ Мы стараемся изо всех сил!</p>
+        <p>Нажмите на кружочки с числами, чтобы их лопнуть! 🎈 </p>
+        <p>🎉 Вас ждёт сюрприз! 🎁</p>
+    </div>
+</div>
+<div class="scoreboard">Счёт: <span id="score">0</span></div>
+<div class="letters-collected" id="collected-letters">
+    <span class="collected-letter" data-letter="R">_</span>
+    <span class="collected-letter" data-letter="O">_</span>
+    <span class="collected-letter" data-letter="U">_</span>
+    <span class="collected-letter" data-letter="L">_</span>
+    <span class="collected-letter" data-letter="E">_</span>
+    <span class="collected-letter" data-letter="T">_</span>
+    <span class="collected-letter" data-letter="T">_</span>
+    <span class="collected-letter" data-letter="E">_</span>
+    <span>&nbsp;&nbsp;</span>
+    <span class="collected-letter" data-letter="P">_</span>
+    <span class="collected-letter" data-letter="R">_</span>
+    <span class="collected-letter" data-letter="E">_</span>
+    <span class="collected-letter" data-letter="D">_</span>
+    <span class="collected-letter" data-letter="I">_</span>
+    <span class="collected-letter" data-letter="C">_</span>
+    <span class="collected-letter" data-letter="T">_</span>
+</div>
+<script>
+    const numberToColor = {
+        "1": "red", "3": "red", "5": "red", "7": "red", "9": "red",
+        "12": "red", "14": "red", "16": "red", "18": "red", "19": "red",
+        "21": "red", "23": "red", "25": "red", "27": "red", "30": "red",
+        "32": "red", "34": "red", "36": "red",
+        "2": "black", "4": "black", "6": "black", "8": "black", "10": "black",
+        "11": "black", "13": "black", "15": "black", "17": "black", "20": "black",
+        "22": "black", "24": "black", "26": "black", "28": "black", "29": "black",
+        "31": "black", "33": "black", "35": "black",
+        "0": "green", "00": "green"
+    };
+
+    let score = 0;
+    let collectedLetters = {};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const matrix = document.querySelector('.matrix');
+        const columns = Math.floor(window.innerWidth / 50);
+        const collectedLettersElement = document.getElementById('collected-letters');
+        const maintenanceContainer = document.getElementById('maintenance-container');
+
+        function addFallingSymbol() {
+            const symbol = document.createElement('span');
+            const number = Math.floor(Math.random() * 38);
+            let numberText = number === 37 ? '00' : number.toString();
+            symbol.classList.add('number-circle');
+            symbol.style.left = `${Math.floor(Math.random() * columns) * 50}px`;
+            symbol.style.animationDelay = `${Math.random() * 5}s`;
+            symbol.innerHTML = numberText;
+
+            if (numberToColor[numberText] === 'red') {
+                symbol.classList.add('red-background');
+            } else if (numberToColor[numberText] === 'black') {
+                symbol.classList.add('black-background');
+                symbol.style.color = '#fff'; // Set text color to white for better visibility
+            } else {
+                symbol.classList.add('green-background');
+            }
+
+            symbol.addEventListener('click', function() {
+                this.remove();
+                score++;
+                document.getElementById('score').innerText = score;
+                maintenanceContainer.style.display = 'none'; // Hide the maintenance message
+            });
+
+            matrix.appendChild(symbol);
+
+            setTimeout(addFallingSymbol, Math.random() * 1000);
+        }
+
+        function addFallingLetter() {
+            const letter = document.createElement('span');
+            const letters = "ROULETTEPREDICT";
+            const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+            letter.classList.add('letter');
+            letter.style.left = `${Math.floor(Math.random() * columns) * 50}px`;
+            letter.style.animationDelay = `${Math.random() * 3}s`;
+            letter.innerHTML = randomLetter;
+
+            letter.addEventListener('click', function() {
+                const letterElement = collectedLettersElement.querySelector(`[data-letter="${randomLetter}"]:not(.collected)`);
+                if (letterElement) {
+                    letterElement.innerText = randomLetter;
+                    letterElement.classList.add('collected');
+                    collectedLetters[randomLetter] = (collectedLetters[randomLetter] || 0) + 1;
+
+                    // Проверка, если все буквы собраны
+                    if (Object.values(collectedLetters).reduce((a, b) => a + b, 0) === 15) {
+                        alert("🎉 Спасибо за помощь! 🎉 MrJin и проект Roulette Predict благодарят вас и желают всего самого лучшего! ✨ Мы ценим ваш вклад в сбор данных. Сюрприз уже близко! 😊 Всё скоро будет хорошо! 🚀");
+                    }
+                }
+                this.remove();
+            });
+
+            matrix.appendChild(letter);
+
+            setTimeout(addFallingLetter, Math.random() * 3000);
+        }
+
+        addFallingSymbol();
+        addFallingLetter();
+    });
+
+    window.addEventListener('scroll', function() {
+        window.scrollTo(0, 0);
+    });
+
+    window.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+    }, { passive: false });
+</script>
+</body>
+</html>

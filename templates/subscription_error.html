@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Ошибка доступа{% endblock %}
+{% block content %}
+<style>
+    .error-container {
+        text-align: center;
+        color: white;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        max-width: 90%;
+    }
+    .error-container h1 {
+        font-size: 2em;
+    }
+    .error-container p {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+    }
+    .error-container button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+    .error-container button:hover {
+        background-color: #45a049;
+    }
+    @media only screen and (max-width: 600px) {
+        .error-container {
+            padding: 10px;
+            max-width: 80%;
+        }
+        .error-container h1 {
+            font-size: 1.8em;
+        }
+        .error-container p {
+            font-size: 1em;
+        }
+        .error-container button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+    }
+</style>
+<div class="error-container">
+    <h1>Отсутвует подписка</h1>
+    <p>Ваша подписка не активна. Пожалуйста, продлите подписку для доступа к предсказаниям.</p>
+    <button id="renewSubscriptionButton">Продлить подписку</button>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var renewButton = document.getElementById('renewSubscriptionButton');
+        renewButton.addEventListener('click', function () {
+            // Замените alert на переход на страницу покупки подписки
+            window.open('https://t.me/tribute/app?startapp=p47Z', '_blank');
+        });
+    });
+</script>
+{% endblock %}

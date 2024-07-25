@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - Предсказывание Рулетки{% endblock %}
+
+{% block content %}
+
+<script src="{{ url_for('static', filename='js/registration.js') }}"></script>
+<header>
+    <h1>Регистрация</h1>
+
+</header>
+  <main>
+    <div class="registration-form-container">
+      <form action="/register" method="post" class="registration-form">
+        <div class="form-field">
+          <label for="username">Имя пользователя:</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-field">
+          <label for="email">Электронная почта:</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-field">
+          <label for="password">Пароль:</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="form-field">
+          <label for="confirm_password">Подтвердите пароль:</label>
+          <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+
+        <div class="form-field">
+          <label for="project">Проект:</label>
+          <select id="project" name="project">
+              <option value="">Выберите проект</option>
+              <option value="GTA5RP">GTA5 RP</option>
+              <option value="Madjestic">Madjestic</option>
+          </select>
+      </div>
+      
+      <div class="form-field">
+          <label for="server">Сервер:</label>
+          <select id="server" name="server" disabled>
+              <!-- Сервера будут добавлены динамически -->
+          </select>
+      </div>
+
+        <div class="form-field">
+          <button type="submit" class="submit-button">Зарегистрироваться</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+
+  <script>
+    $(document).ready(function() {
+        // Инициализация Select2 для поля выбора сервера
+        $('#server').select2({
+            placeholder: 'Выберите сервер',
+            allowClear: true // Добавляем кнопку для очистки выбранного значения
+        });
+    });
+</script>
+
+
+
+{% endblock %}
+  <hr class="footer-divider">
+  <footer>
+      <div class="footer-content">
+          <p>Важно: Все предсказания, сделанные приложением "Предсказатель рулетки для GTA5 RP", предназначены исключительно для развлекательных целей. Мы не несем ответственности за любые потери или ущерб, возникшие в результате использования этих предсказаний в реальной игре или казино.</p>
+          <p>Если у вас есть вопросы или предложения, пожалуйста, свяжитесь с нами через наш Discord сервер: <a href="https://discord.gg/j6EVTYwB9z" target="_blank">Присоединиться к Discord</a>.</p>
+          <hr class="footer-divider">
+          <p>&copy; 2024 MrJin Group. Все права защищены. Все материалы и сервисы являются интеллектуальной собственностью MrJin Group.</p>
+          <p>Для получения дополнительной информации, пожалуйста, ознакомьтесь с <a href="/terms" target="_blank">Пользовательским соглашением</a>.</p>
+      </div>
+  </footer>
+</body>
+</html>

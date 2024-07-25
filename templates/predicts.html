@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница - Предсказывание Рулетки{% endblock %}
+
+{% block content %}
+<header>
+    <h1>Предсказывание рулетки GTA 5 RP</h1>
+</header>
+<main>
+    <form id="predictionForm" action="/predict" method="post">
+        <input type="hidden" name="server" id="hiddenServerField" value="{{ server }}">
+        <!-- Поле для ввода числа и другие элементы формы -->
+    </form>
+    <section>
+        <button id="cancel-last-entry">Отменить последний ввод</button>
+    </section>
+    <section>
+        <h2 style="text-align: center;">Стол Рулетки</h2>
+        <p id="predictions">Нажмите на последнее выпавшее число...</p>
+        <div id="loadingIndicator" style="display: none;">Загрузка...</div>
+        <div id="error" style="color: rgb(255, 0, 0); display: none;">Произошла ошибка</div>
+        <div class="roulette-table-container">
+            <table class="roulette-table">
+                <tr>
+                    <td class="roulette-number green" data-number="00">00</td>
+                    <td class="roulette-number red" data-number="3">3</td>
+                    <td class="roulette-number black" data-number="6">6</td>
+                    <td class="roulette-number red" data-number="9">9</td>
+                    <td class="roulette-number red" data-number="12">12</td>
+                    <td class="roulette-number black" data-number="15">15</td>
+                    <td class="roulette-number red" data-number="18">18</td>
+                    <td class="roulette-number red" data-number="21">21</td>
+                    <td class="roulette-number black" data-number="24">24</td>
+                    <td class="roulette-number red" data-number="27">27</td>
+                    <td class="roulette-number red" data-number="30">30</td>
+                    <td class="roulette-number black" data-number="33">33</td>
+                    <td class="roulette-number red" data-number="36">36</td>
+                </tr>
+                <tr>
+                    <td class="roulette-number orange" data-number=""><div id="selected-number" class="selected-number-circle"></div></td>
+                    <td class="roulette-number black" data-number="2">2</td>
+                    <td class="roulette-number red" data-number="5">5</td>
+                    <td class="roulette-number black" data-number="8">8</td>
+                    <td class="roulette-number black" data-number="11">11</td>
+                    <td class="roulette-number red" data-number="14">14</td>
+                    <td class="roulette-number black" data-number="17">17</td>
+                    <td class="roulette-number black" data-number="20">20</td>
+                    <td class="roulette-number red" data-number="23">23</td>
+                    <td class="roulette-number black" data-number="26">26</td>
+                    <td class="roulette-number black" data-number="29">29</td>
+                    <td class="roulette-number red" data-number="32">32</td>
+                    <td class="roulette-number black" data-number="35">35</td>
+                </tr>
+                <tr>
+                    <td class="roulette-number green" data-number="0">0</td>
+                    <td class="roulette-number red" data-number="1">1</td>
+                    <td class="roulette-number black" data-number="4">4</td>
+                    <td class="roulette-number red" data-number="7">7</td>
+                    <td class="roulette-number black" data-number="10">10</td>
+                    <td class="roulette-number black" data-number="13">13</td>
+                    <td class="roulette-number red" data-number="16">16</td>
+                    <td class="roulette-number red" data-number="19">19</td>
+                    <td class="roulette-number black" data-number="22">22</td>
+                    <td class="roulette-number red" data-number="25">25</td>
+                    <td class="roulette-number black" data-number="28">28</td>
+                    <td class="roulette-number black" data-number="31">31</td>
+                    <td class="roulette-number red" data-number="34">34</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+    <section>
+        <h2>История предсказаний</h2>
+        <div id="guessed-history">
+            <ul></ul>
+        </div>
+    </section>
+</main>
+<script src="{{ url_for('static', filename='js/predictss.js') }}"></script>
+{% endblock %}

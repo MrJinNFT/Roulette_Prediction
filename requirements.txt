@@ -1,0 +1,14 @@
+Flask
+numpy
+pandas
+requests
+gunicorn
+pymongo
+Flask-SQLAlchemy
+Flask-Login
+Flask-Bcrypt
+Flask-Admin
+scikit-learn
+joblib
+tensorflow
+xgboost
