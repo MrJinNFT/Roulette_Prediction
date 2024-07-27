@@ -1,0 +1,19 @@
+# Исключить директории
+node_modules/
+__pycache__/
+.venv/
+.vscode/
+script_generator_kluchey/
+
+# Исключить файлы
+config.py
+data_preparation.py
+newdata.py
+package-lock.json
+package.json
+reinforcement_learning.py
+rpgta5rp_bot.py
+TG_bot.sh
+train_model.py
+users_auth.py
+WEB.sh
