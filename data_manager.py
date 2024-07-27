@@ -24,6 +24,7 @@ def create_tables(server_name):
             timestamp TEXT NOT NULL,
             hour INTEGER,
             minute INTEGER,
+            day_of_week INTEGER,
             username TEXT DEFAULT 'AI'
         );
         ''')
@@ -43,6 +44,8 @@ def create_tables(server_name):
             cursor.execute("ALTER TABLE roulette_numbers ADD COLUMN hour INTEGER")
         if 'minute' not in columns:
             cursor.execute("ALTER TABLE roulette_numbers ADD COLUMN minute INTEGER")
+        if 'day_of_week' not in columns:
+            cursor.execute("ALTER TABLE roulette_numbers ADD COLUMN day_of_week INTEGER")
         if 'username' not in columns:
             cursor.execute("ALTER TABLE roulette_numbers ADD COLUMN username TEXT DEFAULT 'AI'")
         conn.commit()
@@ -57,21 +60,22 @@ def insert_roulette_number(server_name, number, username='AI'):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     hour = datetime.now().hour
     minute = datetime.now().minute
+    day_of_week = datetime.now().weekday()
     number_str = "00" if number == "00" else number
     cursor.execute('''
-        INSERT INTO roulette_numbers (number, timestamp, hour, minute, username)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (number_str, timestamp, hour, minute, username))
+        INSERT INTO roulette_numbers (number, timestamp, hour, minute, day_of_week, username)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (number_str, timestamp, hour, minute, day_of_week, username))
     conn.commit()
     conn.close()
 
-def get_all_numbers(server_name):
+def get_all_numbers_with_timestamp(server_name):
     conn = connect_db(server_name)
     cursor = conn.cursor()
-    cursor.execute('SELECT number FROM roulette_numbers')
+    cursor.execute('SELECT number, timestamp, hour, minute, day_of_week FROM roulette_numbers')
     numbers = cursor.fetchall()
     conn.close()
-    return [n[0] if n[0] != "00" else "00" for n in numbers]
+    return [{'number': n[0], 'timestamp': n[1], 'hour': n[2], 'minute': n[3], 'day_of_week': n[4]} for n in numbers]
 
 def get_following_numbers(server_name, target_number):
     conn = connect_db(server_name)
@@ -103,7 +107,7 @@ def get_guessed_history(server_name):
 def add_guessed_number(server_name, number, username):
     conn = connect_db(server_name)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO guessed_numbers (number, username) VALUES (?, ?)")
+    cursor.execute("INSERT INTO guessed_numbers (number, username) VALUES (?, ?)", (number, username))
     cursor.execute("DELETE FROM guessed_numbers WHERE id NOT IN (SELECT id FROM guessed_numbers ORDER BY timestamp DESC LIMIT 5)")
     conn.commit()
     conn.close()

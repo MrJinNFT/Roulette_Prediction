@@ -15,35 +15,57 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorElement = document.getElementById('error');
     const predictionElement = document.getElementById('predictions');
-    const guessedHistoryElement = document.getElementById('guessed-history ul');
+    const guessedHistoryElement = document.getElementById('guessed-history').querySelector('ul');
+
+    if (!predictionElement || !guessedHistoryElement) {
+        console.error('Не удалось найти элементы predictions или guessed-history');
+        return;
+    }
 
     rouletteNumbers.forEach(function (numberElement) {
         numberElement.addEventListener('click', function () {
             let selectedNumber = numberElement.getAttribute('data-number');
             console.log(selectedNumber);
-            loadingIndicator.style.display = 'block';
-            errorElement.style.display = 'none';
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+            if (errorElement) errorElement.style.display = 'none';
 
             const username = localStorage.getItem('username');
-            const tableNumber = localStorage.getItem('tableNumber');
+            const server = document.getElementById('hiddenServerField').value;
 
             fetch('/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `number=${encodeURIComponent(selectedNumber)}&username=${encodeURIComponent(username)}&tableNumber=${encodeURIComponent(tableNumber)}&server=${encodeURIComponent(document.getElementById('hiddenServerField').value)}`
+                body: new URLSearchParams({
+                    'number': selectedNumber,
+                    'username': username,
+                    'server': server
+                })
             })
             .then(response => {
-                loadingIndicator.style.display = 'none';
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
-                predictionElement.innerHTML = ''; 
-                const predictionRows = [[], []]; 
+                console.log(data); // Логирование полученных данных
+
+                if (data.error) {
+                    if (errorElement) {
+                        errorElement.textContent = data.error;
+                        errorElement.style.display = 'block';
+                    }
+                    return;
+                }
+
+                // Очистка элементов предсказаний
+                predictionElement.innerHTML = '';
+
+                // Отображение предсказаний в две строки
+                const predictionRows = [[], []];
 
                 data.predictions.forEach((prediction, index) => {
                     const numberDisplay = prediction.number === "00" ? "00" : prediction.number;
@@ -66,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         newLabel.textContent = 'New';
                         div.appendChild(newLabel);
                     }
-                    if (prediction.AI) {  
+                    if (prediction.source === 'AI') {
                         const aiLabel = document.createElement('span');
                         aiLabel.classList.add('label', 'ai');
                         aiLabel.textContent = 'AI';
@@ -85,7 +107,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `number=${encodeURIComponent(numberDisplay)}&username=${encodeURIComponent(username)}&server=${encodeURIComponent(document.getElementById('hiddenServerField').value)}`
+                            body: new URLSearchParams({
+                                'number': numberDisplay,
+                                'username': username,
+                                'server': server
+                            })
                         })
                         .then(response => {
                             if (!response.ok) {
@@ -116,15 +142,46 @@ document.addEventListener('DOMContentLoaded', function () {
                     predictionElement.appendChild(rowDiv);
                 });
 
-                // Update guessed history
+                // Обновление истории угаданных чисел
                 guessedHistoryElement.innerHTML = '';
                 data.guessed_history.forEach(entry => {
                     const li = document.createElement('li');
                     li.textContent = `${entry.predictor} угадал число ${entry.number}`;
                     guessedHistoryElement.appendChild(li);
                 });
-            })
 
+                // Обновление с последним выпавшим числом
+                fetch('/update_last_number', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'number': selectedNumber,
+                        'username': username,
+                        'server': server
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(updateData => {
+                    console.log('Последнее число обновлено в базе данных:', updateData);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the update operation:', error);
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                if (errorElement) {
+                    errorElement.textContent = 'Произошла ошибка: ' + error.message;
+                    errorElement.style.display = 'block';
+                }
+            });
         });
     });
 
@@ -134,13 +191,15 @@ document.addEventListener('DOMContentLoaded', function () {
     numbers.forEach(function(number) {
         number.addEventListener('click', function() {
             const selectedValue = this.getAttribute('data-number');
-            selectedNumber.textContent = selectedValue;
-            const color = numberToColor[selectedValue];
-            selectedNumber.style.backgroundColor = color;
-            numbers.forEach(function(num) {
-                num.classList.remove('selected');
-            });
-            this.classList.add('selected');
+            if (selectedNumber) {
+                selectedNumber.textContent = selectedValue;
+                const color = numberToColor[selectedValue];
+                selectedNumber.style.backgroundColor = color;
+                numbers.forEach(function(num) {
+                    num.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            }
         });
     });
 });

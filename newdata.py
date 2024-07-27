@@ -3,11 +3,11 @@ from datetime import datetime
 import pandas as pd
 
 # Путь к исходной базе данных
-source_db_path = '/home/user/DB/serversgta5rp/Blackberry_roulette_data.db'
+source_db_path = '/home/user/DB/serversgta5rp/Strawberry_roulette_data.db'
 # Путь к новой базе данных
-target_db_path = '/home/user/DB/serversgta5rp/New_roulette_data.db'
+target_db_path = '/home/user/DB/serversgta5rp/Strawberry_New_roulette_data.db'
 # Путь к CSV-файлу
-csv_path = '/home/user/DB/serversgta5rp/New_roulette_data.csv'
+csv_path = '/home/user/DB/serversgta5rp/New_Strawberry_roulette_data.csv'
 
 # Функция для создания новой базы данных
 def create_new_db():
@@ -57,12 +57,12 @@ def transfer_data():
             session_id_counter += 1
             session_id = session_id_counter
 
-        data.append((number, timestamp, hour, minute, day_of_week, is_weekend, 'MrJin', session_id))
+        data.append((number, timestamp, hour, minute, day_of_week, is_weekend, 'AI', session_id))
 
         target_cursor.execute('''
         INSERT INTO roulette_numbers (number, timestamp, hour, minute, day_of_week, is_weekend, username, session_id)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (number, timestamp, hour, minute, day_of_week, is_weekend, 'MrJin', session_id))
+        ''', (number, timestamp, hour, minute, day_of_week, is_weekend, 'AI', session_id))
 
     target_conn.commit()
     source_conn.close()
