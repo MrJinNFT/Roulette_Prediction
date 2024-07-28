@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const predictionElement = document.getElementById('predictions');
     const guessedHistoryElement = document.getElementById('guessed-history').querySelector('ul');
     const selectedNumberElement = document.getElementById('selected-number');
+    const extendedPredictionsElement = document.getElementById('extended-predictions');
+    const togglePredictionsCheckbox = document.getElementById('togglePredictions');
 
     if (!predictionElement || !guessedHistoryElement) {
         console.error('Не удалось найти элементы predictions или guessed-history');
@@ -36,6 +38,46 @@ document.addEventListener('DOMContentLoaded', function () {
             guessedHistoryElement.removeChild(guessedHistoryElement.firstChild);
         }
     };
+
+    const displayExtendedPredictions = (predictions) => {
+        extendedPredictionsElement.innerHTML = '';
+
+        const colorPrediction = predictions.color_prediction;
+        const sectorPrediction = predictions.sector_prediction;
+        const rowPrediction = predictions.row_prediction;
+
+        const createPredictionItem = (title, data) => {
+            const container = document.createElement('div');
+            container.classList.add('prediction-container');
+
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = title;
+            container.appendChild(titleElement);
+
+            for (const [key, value] of Object.entries(data)) {
+                const item = document.createElement('div');
+                item.classList.add('prediction-item');
+                item.innerHTML = `<span class="prediction-key">${key}:</span> <span class="prediction-value">${value}%</span>`;
+                container.appendChild(item);
+            }
+
+            return container;
+        };
+
+        extendedPredictionsElement.appendChild(createPredictionItem('Цвет', colorPrediction));
+        extendedPredictionsElement.appendChild(createPredictionItem('Сектор', sectorPrediction));
+        extendedPredictionsElement.appendChild(createPredictionItem('Ряд', rowPrediction));
+    };
+
+    const toggleExtendedPredictions = () => {
+        if (togglePredictionsCheckbox.checked) {
+            extendedPredictionsElement.style.display = 'flex';
+        } else {
+            extendedPredictionsElement.style.display = 'none';
+        }
+    };
+
+    togglePredictionsCheckbox.addEventListener('change', toggleExtendedPredictions);
 
     rouletteNumbers.forEach(function (numberElement) {
         numberElement.addEventListener('click', function () {
@@ -82,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Отображение предсказаний в две строки
                 const predictionRows = [[], []];
 
-                data.predictions.forEach((prediction, index) => {
+                data.predictions.number_predictions.forEach((prediction, index) => {
                     const numberDisplay = prediction.number === "00" ? "00" : prediction.number;
                     const colorClass = `${numberToColor[numberDisplay]}-background`;
                     const div = document.createElement('div');
@@ -112,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (prediction.dubl) {
                         const dublLabel = document.createElement('span');
                         dublLabel.classList.add('label', 'dubl');
-                        dublLabel.textContent = 'Dubl';
                         div.appendChild(dublLabel);
                     }
 
@@ -156,8 +197,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Обновление истории угаданных чисел
                 updateGuessedHistory(data.guessed_history);
 
+                // Отображение расширенных предсказаний
+                if (togglePredictionsCheckbox.checked) {
+                    displayExtendedPredictions(data.predictions);
+                }
+
                 // Добавление автоматического обновления угаданных чисел
-                const newGuessedNumber = data.predictions.find(p => p.number === selectedNumber);
+                const newGuessedNumber = data.predictions.number_predictions.find(p => p.number === selectedNumber);
                 if (newGuessedNumber) {
                     fetch('/guessed', {
                         method: 'POST',
@@ -272,4 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Инициализация состояния переключателя
+    toggleExtendedPredictions();
 });

@@ -579,7 +579,6 @@ footer a:hover {
   margin-bottom: 10px;
 }
 
-/* CSS стили для метки "DUBL" */
 .dubl-label {
   background: linear-gradient(to right, #ffcc00, #ff0000);
   color: white;
@@ -587,7 +586,6 @@ footer a:hover {
   border-radius: 6px;
   font-weight: bold;
 }
-
 
 .probability {
   background: linear-gradient(to right, #8a2be2, #b19cd9);
@@ -605,7 +603,6 @@ footer a:hover {
   background: linear-gradient(to right, #b19cd9, #8a2be2);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
-
 
 .maintenance-container {
   display: flex;
@@ -653,4 +650,83 @@ footer a:hover {
 @keyframes marquee {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.switch-label:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.switch-checkbox:checked + .switch-label {
+  background-color: #13e900;
+}
+
+.switch-checkbox:checked + .switch-label:before {
+  transform: translateX(26px);
+}
+
+.prediction-container {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 5px;
+  color: #fff;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.prediction-container h3 {
+  margin: 0;
+  padding: 5px 0;
+  font-size: 1.2em;
+}
+
+.prediction-key {
+  font-weight: bold;
+}
+
+.prediction-value {
+  margin-left: 5px;
+}
+
+.prediction-box {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  flex: 1 1 200px;
+  min-width: 150px;
 }

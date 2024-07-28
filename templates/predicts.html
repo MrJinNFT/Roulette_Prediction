@@ -26,12 +26,24 @@
 <section>
     <button id="cancel-last-entry">Отменить последний ввод</button>
 </section>
-    <section>
-        <h2 style="text-align: center;">Стол Рулетки</h2>
-        <p id="predictions">Нажмите на последнее выпавшее число...</p>
-        <div id="loadingIndicator" style="display: none;">Загрузка...</div>
-        <div id="error" style="color: rgb(255, 0, 0); display: none;">Произошла ошибка</div>
-        <div class="roulette-table-container">
+
+<section>
+    <h2 style="text-align: center;">Стол Рулетки</h2>
+    <div class="toggle-container">
+        <label for="togglePredictions">Цвет/Сектор/Ряд:</label>
+        <div class="switch">
+            <input type="checkbox" id="togglePredictions" class="switch-checkbox">
+            <label class="switch-label" for="togglePredictions">
+                <span class="switch-inner"></span>
+                <span class="switch-switch"></span>
+            </label>
+        </div>
+    </div>
+    <div id="extended-predictions" class="container"></div>
+    <p id="predictions">Нажмите на последнее выпавшее число...</p>
+    <div id="loadingIndicator" style="display: none;">Загрузка...</div>
+    <div id="error" style="color: rgb(255, 0, 0); display: none;">Произошла ошибка</div>
+    <div class="roulette-table-container">
             <table class="roulette-table">
                 <tr>
                     <td class="roulette-number green" data-number="00">00</td>
@@ -87,6 +99,7 @@
             <ul></ul>
         </div>
     </section>
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2848233949493411"
     crossorigin="anonymous"></script>
 <ins class="adsbygoogle"

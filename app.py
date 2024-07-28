@@ -46,7 +46,7 @@ def predict():
         insert_roulette_number(selected_server, number, username)
 
         # Проверка на совпадение предсказанного числа с введенным числом
-        for prediction in predictions:
+        for prediction in predictions['number_predictions']:
             if prediction['number'] == number:
                 source = 'AI' if 'source' in prediction and prediction['source'] == 'AI' else 'User'
                 add_guessed_number(selected_server, number, username, source)
@@ -64,7 +64,6 @@ def log_guessed_number_to_file(number, username, server, source):
     with open(log_filename, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([timestamp, username, number, server, source])    
-
 
 @app.route('/guessed', methods=['POST'])
 def guessed():
@@ -94,7 +93,6 @@ def update_last_number():
         return jsonify({'error': 'Number, username, and server are required'}), 400
 
     try:
-
         insert_roulette_number(server, number, username)
         return jsonify({'status': 'success'})
     except Exception as e:

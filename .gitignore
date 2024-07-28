@@ -17,3 +17,4 @@ TG_bot.sh
 train_model.py
 users_auth.py
 WEB.sh
+.gitignore

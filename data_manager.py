@@ -122,7 +122,6 @@ def add_guessed_number(server_name, number, username, source='User'):
     conn.commit()
     conn.close()
 
-    # Запись в файл
     write_to_history_file(number, username, server_name, source)
 
 def write_to_history_file(number, username, server, source):
@@ -151,3 +150,11 @@ def cancel_and_get_previous_entry(server_name):
     finally:
         cursor.close()
         conn.close()
+
+def get_all_numbers(server_name):
+    conn = connect_db(server_name)
+    cursor = conn.cursor()
+    cursor.execute('SELECT number FROM roulette_numbers')
+    numbers = cursor.fetchall()
+    conn.close()
+    return [n[0] if n[0] != "00" else "00" for n in numbers]
