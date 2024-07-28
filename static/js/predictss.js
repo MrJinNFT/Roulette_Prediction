@@ -16,11 +16,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const errorElement = document.getElementById('error');
     const predictionElement = document.getElementById('predictions');
     const guessedHistoryElement = document.getElementById('guessed-history').querySelector('ul');
+    const selectedNumberElement = document.getElementById('selected-number');
 
     if (!predictionElement || !guessedHistoryElement) {
         console.error('Не удалось найти элементы predictions или guessed-history');
         return;
     }
+
+    const updateGuessedHistory = (guessedHistory) => {
+        guessedHistoryElement.innerHTML = '';
+        guessedHistory.forEach(entry => {
+            const li = document.createElement('li');
+            li.innerHTML = `${entry.predictor} угадал число <span class="${numberToColor[entry.number]}">${entry.number}</span>${entry.source === 'AI' ? ' (AI)' : ''}`;
+            guessedHistoryElement.appendChild(li);
+        });
+
+        // Убедимся, что список не превышает 10 элементов
+        while (guessedHistoryElement.children.length > 10) {
+            guessedHistoryElement.removeChild(guessedHistoryElement.firstChild);
+        }
+    };
 
     rouletteNumbers.forEach(function (numberElement) {
         numberElement.addEventListener('click', function () {
@@ -110,7 +125,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             body: new URLSearchParams({
                                 'number': numberDisplay,
                                 'username': username,
-                                'server': server
+                                'server': server,
+                                'source': prediction.source === 'AI' ? 'AI' : 'User' // Установка правильного источника
                             })
                         })
                         .then(response => {
@@ -120,12 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             return response.json();
                         })
                         .then(guessedData => {
-                            guessedHistoryElement.innerHTML = '';
-                            guessedData.forEach(entry => {
-                                const li = document.createElement('li');
-                                li.textContent = `${entry.predictor} угадал число ${entry.number}`;
-                                guessedHistoryElement.appendChild(li);
-                            });
+                            updateGuessedHistory(guessedData);
                         })
                         .catch(error => {
                             console.error('There was a problem with the fetch operation:', error);
@@ -143,12 +154,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 // Обновление истории угаданных чисел
-                guessedHistoryElement.innerHTML = '';
-                data.guessed_history.forEach(entry => {
-                    const li = document.createElement('li');
-                    li.textContent = `${entry.predictor} угадал число ${entry.number}`;
-                    guessedHistoryElement.appendChild(li);
-                });
+                updateGuessedHistory(data.guessed_history);
+
+                // Добавление автоматического обновления угаданных чисел
+                const newGuessedNumber = data.predictions.find(p => p.number === selectedNumber);
+                if (newGuessedNumber) {
+                    fetch('/guessed', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            'number': newGuessedNumber.number,
+                            'username': username,
+                            'server': server,
+                            'source': newGuessedNumber.source === 'AI' ? 'AI' : 'User' // Установка правильного источника
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(guessedData => {
+                        updateGuessedHistory(guessedData);
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
+                }
 
                 // Обновление с последним выпавшим числом
                 fetch('/update_last_number', {
@@ -184,6 +219,41 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    // Добавление обработчика для кнопки "Отменить последний ввод"
+    const cancelButton = document.getElementById('cancel-last-entry');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function () {
+            const server = document.getElementById('hiddenServerField').value;
+
+            fetch('/cancel_last_entry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'server': server
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`Последний ввод отменен. Предыдущее число: ${data.previous_number}`);
+                    // Обновление элемента selected-number
+                    if (selectedNumberElement && data.previous_number) {
+                        const color = numberToColor[data.previous_number];
+                        selectedNumberElement.textContent = data.previous_number;
+                        selectedNumberElement.style.backgroundColor = color;
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        });
+    }
 
     const numbers = document.querySelectorAll('.roulette-number');
     const selectedNumber = document.getElementById('selected-number');

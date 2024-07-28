@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 DATABASE_PATH = "/home/user/DB/serversgta5rp"
+HISTORY_FILE_PATH = "/home/user/DB/users/guessed_numbers_log.csv"
 
 def connect_db(server_name):
     if server_name is None:
@@ -33,7 +34,8 @@ def create_tables(server_name):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             number TEXT NOT NULL,
             username TEXT NOT NULL,
-            timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            source TEXT
         );
         ''')
         conn.commit()
@@ -49,6 +51,13 @@ def create_tables(server_name):
         if 'username' not in columns:
             cursor.execute("ALTER TABLE roulette_numbers ADD COLUMN username TEXT DEFAULT 'AI'")
         conn.commit()
+
+        cursor.execute("PRAGMA table_info(guessed_numbers)")
+        guessed_columns = [info[1] for info in cursor.fetchall()]
+        if 'source' not in guessed_columns:
+            cursor.execute("ALTER TABLE guessed_numbers ADD COLUMN source TEXT")
+        conn.commit()
+
     except Exception as e:
         print(f"Ошибка при создании таблиц: {e}")
     finally:
@@ -99,27 +108,35 @@ def get_following_numbers(server_name, target_number):
 def get_guessed_history(server_name):
     conn = connect_db(server_name)
     cursor = conn.cursor()
-    cursor.execute("SELECT number, username FROM guessed_numbers ORDER BY timestamp DESC LIMIT 5")
+    cursor.execute("SELECT number, username, source FROM guessed_numbers ORDER BY timestamp DESC LIMIT 10")
     history = cursor.fetchall()
     conn.close()
-    return [{'number': row[0], 'predictor': row[1]} for row in history]
+    return [{'number': row[0], 'predictor': row[1], 'source': row[2]} for row in history]
 
-def add_guessed_number(server_name, number, username):
+def add_guessed_number(server_name, number, username, source='User'):
     conn = connect_db(server_name)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO guessed_numbers (number, username) VALUES (?, ?)", (number, username))
-    cursor.execute("DELETE FROM guessed_numbers WHERE id NOT IN (SELECT id FROM guessed_numbers ORDER BY timestamp DESC LIMIT 5)")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO guessed_numbers (number, username, source, timestamp) VALUES (?, ?, ?, ?)", (number, username, source, timestamp))
+    cursor.execute("DELETE FROM guessed_numbers WHERE id NOT IN (SELECT id FROM guessed_numbers ORDER BY timestamp DESC LIMIT 10)")
     conn.commit()
     conn.close()
+
+    # Запись в файл
+    write_to_history_file(number, username, server_name, source)
+
+def write_to_history_file(number, username, server, source):
+    with open(HISTORY_FILE_PATH, 'a') as file:
+        file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')},{username},{number},{server},{source}\n")
 
 def cancel_and_get_previous_entry(server_name):
     try:
         conn = connect_db(server_name)
         cursor = conn.cursor()
-        cursor.execute('SELECT id FROM roulette_numbers ORDER BY id DESC LIMIT 1')
+        cursor.execute('SELECT id, number FROM roulette_numbers ORDER BY id DESC LIMIT 1')
         last_entry = cursor.fetchone()
         if last_entry:
-            last_entry_id = last_entry[0]
+            last_entry_id, last_number = last_entry[0], last_entry[1]
             cursor.execute('SELECT number FROM roulette_numbers WHERE id < ? ORDER BY id DESC LIMIT 1', (last_entry_id,))
             previous_entry = cursor.fetchone()
             cursor.execute('DELETE FROM roulette_numbers WHERE id = ?', (last_entry_id,))

@@ -9,11 +9,23 @@
 <main>
     <form id="predictionForm" action="/predict" method="post">
         <input type="hidden" name="server" id="hiddenServerField" value="{{ server }}">
-
     </form>
-    <section>
-        <button id="cancel-last-entry">Отменить последний ввод</button>
-    </section>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2848233949493411"
+    crossorigin="anonymous"></script>
+<!-- Над столом -->
+<ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-2848233949493411"
+    data-ad-slot="6108380524"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    
+<section>
+    <button id="cancel-last-entry">Отменить последний ввод</button>
+</section>
     <section>
         <h2 style="text-align: center;">Стол Рулетки</h2>
         <p id="predictions">Нажмите на последнее выпавшее число...</p>
@@ -71,10 +83,20 @@
     </section>
     <section>
         <h2>История предсказаний</h2>
-        <div id="guessed-history">
+        <div id="guessed-history" class="marquee">
             <ul></ul>
         </div>
     </section>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2848233949493411"
+    crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+    style="display:block"
+    data-ad-format="autorelaxed"
+    data-ad-client="ca-pub-2848233949493411"
+    data-ad-slot="8734543866"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 </main>
 <script src="{{ url_for('static', filename='js/predictss.js') }}"></script>
 {% endblock %}
